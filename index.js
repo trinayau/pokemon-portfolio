@@ -12,26 +12,11 @@ for (let i = 0; i < collisions.length; i+=70){
     collisionsMap.push(collisions.slice(i, 70 + i))
 }   
 
-class Boundary {
-    static width = 66
-    static height = 66
-    constructor({position}){
-        this.position = position;
-        this.width = 66;
-        this.height = 66;
-    }
-
-    draw(){
-        c.fillStyle = 'rgba(0, 0, 0, 0.0)';
-        c.fillRect(this.position.x, this.position.y, this.width, this.height);
-    }
-
-}
 
 const boundaries = [];
 const offset = {
-    x: -1205,
-    y: -900
+    x: -980,
+    y: -950
 }
 
 collisionsMap.forEach((row, i) => {
@@ -51,37 +36,23 @@ c.fillRect(0, 0, canvas.width, canvas.height);
 const image = new Image();
 image.src = "./img/Pellet Town.png";
 
-const playerImage = new Image();
-playerImage.src = "./img/playerDown.png";
+const foregroundImage = new Image()
+foregroundImage.src = "./img/Foreground.png"
+
+const playerDownImage = new Image();
+playerDownImage.src = "./img/playerDown.png";
+
+const playerUpImage = new Image();
+playerUpImage.src = "./img/playerUp.png";
+
+const playerLeftImage = new Image();
+playerLeftImage.src = "./img/playerLeft.png";
+
+const playerRightImage = new Image();
+playerRightImage.src = "./img/playerRight.png";
 
 image.onload = () => {
     animate();
-};
-
-class Sprite {
-    constructor({position, velocity, image, frames = {max: 1}}) {
-        this.position = position;
-        this.image = image;
-        this.frames = frames;
-        this.image.onload = () => {
-            this.width = this.image.width/this.frames.max;
-            this.height = this.image.height;
-            
-        }
-    }
-
-    draw() {
-      
-        c.drawImage(this.image, 
-            0,
-            0,
-            this.image.width/this.frames.max,
-            this.image.height,
-            this.position.x,
-            this.position.y,
-            this.image.width/this.frames.max,
-            this.image.height)
-    }
 };
 
 const player = new Sprite({
@@ -89,15 +60,26 @@ const player = new Sprite({
         x: canvas.width / 2 - 192 / 4/2,
         y: canvas.height/2 - 68 / 2
     },
-    image: playerImage,
+    image: playerDownImage,
     frames: {
         max: 4
+    },
+    sprites:{
+        up: playerUpImage,
+        left: playerLeftImage,
+        right: playerRightImage,
+        down: playerDownImage
     }
 })
 
 const background = new Sprite({
     position: {x: offset.x, y: offset.y},
     image: image
+});
+
+const foreground = new Sprite({
+    position: {x: offset.x, y: offset.y},
+    image: foregroundImage
 });
 
 const keys = {
@@ -116,7 +98,7 @@ const keys = {
     },
 }
 
-const movables = [background, ...boundaries];
+const movables = [background, ...boundaries, foreground];
 
 function rectangularCollision({rectangle1, rectangle2}){
 
@@ -135,10 +117,15 @@ function animate(){
         
     });
     player.draw();
+    foreground.draw();
+
 
    
     let moving = true
+    player.moving = false;
     if(keys.w.pressed && lastKey === 'w') {
+        player.moving = true;
+        player.image = player.sprites.up;
         for (let i = 0; i< boundaries.length; i++) {
             const boundary = boundaries[i];
             if(
@@ -156,6 +143,8 @@ function animate(){
 
     }
     else if(keys.a.pressed && lastKey === 'a') {
+        player.moving = true;
+        player.image = player.sprites.left;
         for (let i = 0; i< boundaries.length; i++) {
             const boundary = boundaries[i];
             if(
@@ -172,6 +161,8 @@ function animate(){
         }
     }
     else if(keys.s.pressed && lastKey === 's') {
+        player.moving = true;
+        player.image = player.sprites.down;
         for (let i = 0; i< boundaries.length; i++) {
             const boundary = boundaries[i];
             if(
@@ -189,6 +180,8 @@ function animate(){
     
     }
     else if(keys.d.pressed && lastKey === 'd') {
+        player.moving = true;
+        player.image = player.sprites.right; 
         for (let i = 0; i< boundaries.length; i++) {
             const boundary = boundaries[i];
             if(
